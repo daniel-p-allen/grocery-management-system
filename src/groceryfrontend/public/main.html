@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <img src="logo.jpg" alt="Logo" class="logo">
+    <title>Main Screen</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Linking styles.css -->
+</head>
+<body>
+    <div class="container">
+        <h1>Main Screen</h1>
+
+        <!-- Button or Link to Add Products -->
+       
+        <div class="top-right">
+            <a href="/update-stock.html" class="add-product-btn">Add Products</a>
+          </div>
+
+        <p><strong>Last Order Date:</strong> <!-- Dynamically load the lastOrderDate from the backend --></p>
+
+        <h2>Current Shopping List</h2>
+        <ul class="shopping-list" id="shopping-list">
+            <!-- Placeholder for shopping list items -->
+            <li>No items in the shopping list</li> <!-- Will be replaced dynamically by backend data -->
+        </ul>
+
+        <form action="/update-order-date" method="POST">
+            <button type="submit">Order</button>
+        </form>
+    </div>
+</body>
+</html>

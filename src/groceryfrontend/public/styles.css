@@ -1,0 +1,133 @@
+/* General Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    margin: 20px;
+}
+
+/* Login Page */
+.login-container {
+    text-align: center;
+}
+
+input {
+    padding: 10px;
+    margin: 10px 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+
+/* Responsive Design */
+@media (min-width: 600px) {
+    .container {
+        max-width: 600px;
+    }
+}
+
+@media (min-width: 768px) {
+    .container {
+        max-width: 800px;
+    }
+}
+
+/* Main Screen for Shopping List */
+.shopping-list {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+.shopping-list li {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Order Button */
+form {
+    text-align: center;
+    margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    .shopping-list li {
+        font-size: 14px;
+    }
+}
+
+/* Styling for the logo */
+header {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .logo {
+    width: 150px;
+    height: auto;
+  }
+  
+  /* Top-right positioning for the Add Product button */
+  .top-right {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+  }
+  
+  /* Styling for the Add Product link as a button */
+  .add-product-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    border-radius: 5px;
+    text-decoration: none;
+  }
+  
+  

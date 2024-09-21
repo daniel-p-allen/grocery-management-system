@@ -1,0 +1,23 @@
+# Ignore Dockerfile in groceryfrontend
+src/groceryfrontend/Dockerfile
+
+# Ignore keys.pem file (private keys)
+src/groceryfrontend/keys.pem
+
+# Ignore myimage.tar (docker image)
+src/groceryfrontend/myimage.tar
+
+# Ignore node_modules directories in both groceryfrontend and newserver
+src/groceryfrontend/node_modules/
+src/newserver/node_modules/
+
+# Ignore the grocerydemo file (case-sensitive with capital letters)
+GroceryDemo.mov
+
+# Ignore Word documents
+UI Test Results.docx
+System Architecture Document.docx
+
+# Ignore env files
+src/groceryfrontend/.env
+src/.env

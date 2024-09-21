@@ -1,0 +1,8 @@
+DAN-NOTES
+
+ bashservice.sh is listening to the port and updating the data.json
+
+
+ dbservice.js is supposed to run every minute or so, takes the json info and saves it to the Mongo db
+
+ simulator.js is what simulates the sending of the product numbers from the Arduino
