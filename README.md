@@ -55,18 +55,16 @@ Watch the [Demo Video](https://deakin.au.panopto.com/Panopto/Pages/Viewer.aspx?i
 ## File Structure
 ```
 grocery-management-system/
-├── src/                   # Source code for the system
-├── docs/                  # Documentation like UML diagrams, technical details
+├── src/                   # Source code for the sys
 ├── tests/                 # Test files
-├── README.md              # Project overview and instructions
-├── .gitignore             # Files and directories to be ignored by Git
-├── LICENSE                # License file
+├── README.md           # Project overview and instructions
+├── .gitignore          # Files and directories to be ignored by Git
+├── LICENSE             # License file
 ```
 
 ## Documentation
-See the `/docs` folder for:
+See the `/` folder for:
 - UML diagrams
-- Technical documentation
 - System architecture
 
 ## License
