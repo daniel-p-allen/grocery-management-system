@@ -22,6 +22,6 @@ System Architecture Document.docx
 src/groceryfrontend/.env
 src/.env
 src/newserver/.env
-
+.env
 # macOS
 .DS_Store
