@@ -21,3 +21,7 @@ System Architecture Document.docx
 # Ignore env files
 src/groceryfrontend/.env
 src/.env
+src/newserver/.env
+
+# macOS
+.DS_Store
