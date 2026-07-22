@@ -7,8 +7,11 @@
 // product exists, so scans inserted before the catalogue would be consumed and lost. The
 // catalogue is written first for that reason.
 //
-// Running this twice is safe: the products are upserted, and the sample scans are only
-// inserted if the collection is empty.
+// Running this twice is safe, and that matters more than it looks: compose restarts the
+// seed whenever the frontend is rebuilt. An earlier version upserted the stock levels with
+// $set, which reset every product to its starting quantity on the second run while the
+// scans, already present, were not reprocessed — leaving a full pantry and an empty
+// shopping list. So this seeds only what is missing and never overwrites live stock.
 
 require('dotenv').config();
 
@@ -39,14 +42,24 @@ async function seed() {
 
         const now = new Date().toISOString();
 
+        // $setOnInsert, not $set: a product that is already there keeps whatever stock
+        // level the system has moved it to.
+        let inserted = 0;
+
         for (const item of pantry) {
-            await db.collection('items').updateOne(
+            const result = await db.collection('items').updateOne(
                 { itemNo: item.itemNo },
-                { $set: { ...item, lastUpdated: now } },
+                { $setOnInsert: { ...item, lastUpdated: now } },
                 { upsert: true }
             );
+            if (result.upsertedCount) inserted += 1;
         }
-        console.log(`Seeded ${pantry.length} products.`);
+
+        console.log(
+            inserted
+                ? `Seeded ${inserted} product(s).`
+                : `All ${pantry.length} products already present; stock left untouched.`
+        );
 
         const existingScans = await db.collection('groceryitems').countDocuments();
 

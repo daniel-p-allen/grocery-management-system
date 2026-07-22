@@ -28,6 +28,20 @@ target stock, so the shopping list has something in it immediately.
 [Demo video](https://deakin.au.panopto.com/Panopto/Pages/Viewer.aspx?id=6ebda2a1-8227-4fca-a4cf-b1ef00b36d87)
 (Deakin sign-in may be required)
 
+## Screenshots
+
+Taken from the compose stack above, so this is what `docker compose up` actually gives you.
+
+| | |
+|---|---|
+| ![Login](docs/screenshots/01-login.png) | ![Shopping list](docs/screenshots/02-main.png) |
+| Customer number unlocks the system. | The shopping list, built from the gap between current and desired stock. Coffee has been used twice, so it needs two. |
+
+![Stock levels](docs/screenshots/03-my-products.png)
+
+Current against desired stock for every tracked product. These numbers started at the
+desired level and fell as the seeded scans were processed.
+
 ![System architecture](grocery.drawio.png)
 
 ## How it works

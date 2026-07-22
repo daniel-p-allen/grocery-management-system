@@ -22,6 +22,18 @@ if (!mongoUrl) {
     process.exit(1);
 }
 
+// Dates are stored as ISO strings because that is what the Arduino pipeline produces.
+// They are readable to a machine, not to a person, so they are formatted before display.
+function formatDate(isoString) {
+    const date = new Date(isoString);
+
+    if (Number.isNaN(date.getTime())) {
+        return 'Unknown';
+    }
+
+    return date.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
 let db;
 let settingsCollection;
 let itemsCollection;
@@ -281,7 +293,7 @@ app.get('/main', async (req, res) => {
             <!-- Clear floats -->
             <div style="clear: both;"></div>
             <!-- Display the Last Order Date -->
-            <p><strong>Last Order Date:</strong> ${settings ? settings.lastOrderDate : 'No orders yet'}</p>
+            <p><strong>Last Order Date:</strong> ${settings ? formatDate(settings.lastOrderDate) : 'No orders yet'}</p>
             <br><br>
             <!-- Current Shopping List -->
             <h2>Current Shopping List</h2>
