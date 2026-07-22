@@ -33,7 +33,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 // Connect to MongoDB
-MongoClient.connect(mongoUrl, { useUnifiedTopology: true })
+// useUnifiedTopology was passed here originally. It has had no effect since driver
+// version 4 and now prints a deprecation warning on every start, so it is gone.
+MongoClient.connect(mongoUrl)
     .then(client => {
         db = client.db('grocerydb');
         settingsCollection = db.collection('settings');       // Application settings

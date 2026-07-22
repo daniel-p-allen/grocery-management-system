@@ -5,7 +5,8 @@
   "main": "dbservice.js",
   "scripts": {
     "start": "node dbservice.js",
-    "simulate": "node simulator.js"
+    "simulate": "node simulator.js",
+    "seed": "node seed.js"
   },
   "keywords": [
     "iot",

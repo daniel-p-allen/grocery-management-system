@@ -1,28 +1,28 @@
-# Ignore Dockerfile in groceryfrontend
-src/groceryfrontend/Dockerfile
+# Secrets and key material. The original 2024 Dockerfile was ignored alongside these
+# because it had a TLS key baked into it. The committed Dockerfiles take their
+# configuration from the environment instead, so they belong in the repository.
+.env
+src/.env
+src/newserver/.env
+src/groceryfrontend/.env
+*.pem
+*.key
 
-# Ignore keys.pem file (private keys)
-src/groceryfrontend/keys.pem
-
-# Ignore myimage.tar (docker image)
+# Build artefacts
 src/groceryfrontend/myimage.tar
-
-# Ignore node_modules directories in both groceryfrontend and newserver
+node_modules/
 src/groceryfrontend/node_modules/
 src/newserver/node_modules/
 
-# Ignore the grocerydemo file (case-sensitive with capital letters)
-GroceryDemo.mov
+# Runtime scan data. data.json is committed as sample data; anything the services
+# write beyond it is local state.
+src/newserver/tmp.*.json
 
-# Ignore Word documents
+# Source documents for the committed PDFs, and the raw demo recording
+GroceryDemo.mov
 UI Test Results.docx
 System Architecture Document.docx
 
-# Ignore env files
-src/groceryfrontend/.env
-src/.env
-src/newserver/.env
-.env
 # macOS
 .DS_Store
 

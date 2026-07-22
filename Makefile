@@ -11,7 +11,15 @@
 FRONTEND := src/groceryfrontend
 EDGE     := src/newserver
 
-.PHONY: install start simulate check clean
+.PHONY: demo demo-down install start simulate seed check clean
+
+# The whole system, self-contained: local database, seeded pantry, UI on port 4000.
+# Needs Docker only. No Atlas account, no Arduino, no configuration.
+demo:
+	docker compose up --build
+
+demo-down:
+	docker compose down -v
 
 # Install dependencies for both services.
 install:
@@ -25,6 +33,10 @@ start:
 # Feed the system product codes without any hardware attached.
 simulate:
 	cd $(EDGE) && npm run simulate
+
+# Put a small pantry and some sample scans into an empty database.
+seed:
+	cd $(EDGE) && npm run seed
 
 # Refuse to ship if anything resembling a real credential is in the tree. This
 # system holds database, cloud and TLS secrets, so the repo has to check itself.

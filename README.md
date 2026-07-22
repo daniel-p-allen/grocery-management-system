@@ -1,14 +1,32 @@
 # Grocery Management System
 
+[![checks](https://github.com/daniel-p-allen/grocery-management-system/actions/workflows/ci.yml/badge.svg)](https://github.com/daniel-p-allen/grocery-management-system/actions/workflows/ci.yml)
+
 An IoT pantry-tracking prototype. A 4×4 keypad wired to an Arduino reports items as they
-are used — each product has a 3-digit code — and the system records them in MongoDB Atlas,
+are used — each product has a 3-digit code — and the system records them in MongoDB,
 tracks stock levels, and builds a shopping list when items run low.
 
 Built as a university IoT project (2024). Currently being extended into a full hardware
 prototype — see [Status](#status).
 
-**[Demo video](https://deakin.au.panopto.com/Panopto/Pages/Viewer.aspx?id=6ebda2a1-8227-4fca-a4cf-b1ef00b36d87)**
-· [System Architecture Document](System%20Architecture%20Document.pdf)
+## Try it
+
+```bash
+docker compose up          # or: make demo
+```
+
+Then open <http://localhost:4000> and enter customer number `1234`.
+
+No MongoDB account, no Arduino, no configuration. The database runs locally, the pantry is
+seeded with four products and five scans, and the processing interval is dropped from a
+minute to three seconds so a scan takes effect while you watch. Coffee starts below its
+target stock, so the shopping list has something in it immediately.
+
+`make demo-down` removes the containers and the database volume.
+
+[System Architecture Document](System%20Architecture%20Document.pdf) ·
+[Demo video](https://deakin.au.panopto.com/Panopto/Pages/Viewer.aspx?id=6ebda2a1-8227-4fca-a4cf-b1ef00b36d87)
+(Deakin sign-in may be required)
 
 ![System architecture](grocery.drawio.png)
 
@@ -38,7 +56,10 @@ MongoDB database `grocerydb`:
 - `items` — the product catalogue and current stock levels.
 - `settings` — application state, including `lastOrderDate`.
 
-## Running it
+## Running it without Docker
+
+The compose stack above is the quickest way in. Run the services directly when you want to
+attach real hardware, or point the system at a MongoDB Atlas cluster.
 
 ### Prerequisites
 
@@ -67,7 +88,22 @@ defaults to one minute. That is a sensible pace for a pantry but a tedious one f
 demonstration, so lower it — `PROCESS_INTERVAL_MS=3000` makes the effect of a scan visible
 almost immediately.
 
-### 2. Install and start the frontend
+### 2. Seed the database
+
+A fresh database has no product catalogue, so the UI would render an empty page. This adds
+four products and the sample scans:
+
+```bash
+cd src/newserver
+npm install
+npm run seed       # or: make seed
+```
+
+Safe to run more than once. Skip it if you would rather add products by hand on the
+update-stock page — but add them *before* scanning, or the scans are discarded (see
+[Status](#status)).
+
+### 3. Install and start the frontend
 
 ```bash
 cd src/groceryfrontend
@@ -75,7 +111,7 @@ npm install
 npm start          # http://localhost:4000
 ```
 
-### 3. Feed it some scans
+### 4. Feed it some scans
 
 With hardware:
 
@@ -102,9 +138,11 @@ the scans.
 
 - **Hardware** — Elegoo Arduino Uno, 4×4 matrix keypad, USB serial
 - **Edge** — Bash, `jq`
-- **Backend** — Node.js, Express, MongoDB Atlas driver
+- **Backend** — Node.js, Express, MongoDB
 - **Frontend** — server-rendered HTML/CSS (no framework)
-- **Deployment** — Docker; ran on AWS during the 2024 project, not currently hosted
+- **Containers** — Docker and Docker Compose for the self-contained demo
+- **CI** — GitHub Actions
+- **Deployment** — ran on AWS during the 2024 project, not currently hosted
   (see [Status](#status))
 
 ## Repository layout
@@ -113,9 +151,13 @@ the scans.
 grocery-management-system/
 ├── src/
 │   ├── arduinoGROCERYPROJ/     # Arduino sketch (C++)
-│   ├── newserver/              # Edge capture + database service
+│   ├── newserver/              # Edge capture, database and seed services
 │   └── groceryfrontend/        # Express app and UI
-├── tests/                      # UI test results
+├── scripts/
+│   └── check-secrets.sh        # Refuses to ship committed credentials
+├── tests/                      # Recorded UI test results (not an automated suite)
+├── docker-compose.yml          # Self-contained demo: database, seed, UI
+├── Makefile                    # demo, seed, start, simulate, check
 ├── System Architecture Document.pdf
 ├── grocery.drawio.png          # Architecture diagram
 └── LICENSE.txt                 # MIT
@@ -127,12 +169,19 @@ grocery-management-system/
 make check      # refuse to ship if a real credential is in the tree
 ```
 
-This system holds three kinds of secret at once — a MongoDB Atlas password, cloud
-credentials and a TLS key — and a scanner once flagged a connection string in
-`src/newserver/.env` before this repository was published. Rather than rely on
-remembering, the repository checks itself: `scripts/check-secrets.sh` fails the build if a
-`.env`, `.pem`, `.key` or image tarball is tracked, if a MongoDB URI appears with anything
-other than a placeholder password, or if an AWS key ID or private key block is committed.
+This system holds three kinds of secret at once — a MongoDB password, cloud credentials and
+a TLS key — and a scanner once flagged a connection string in `src/newserver/.env` before
+this repository was published. Rather than rely on remembering, the repository checks
+itself. `scripts/check-secrets.sh` fails the build if:
+
+- a `.env`, `.pem`, `.key`, `.p12` or image tarball is tracked;
+- a MongoDB URI carries credentials whose password is not a placeholder — a URI with no
+  `user:password@`, such as the compose stack's `mongodb://mongo:27017/grocerydb`, holds
+  no secret and is allowed;
+- an AWS access key ID or a private key block is committed;
+- the secret scanner's cache is left in the tree.
+
+The checks are verified against planted fake credentials rather than assumed to work.
 
 The same script runs in CI on every push and pull request, alongside checks that both
 services install cleanly, all JavaScript and shell parses, the sample scan data has the
@@ -144,10 +193,12 @@ This is a **working prototype, not a product.** Known limitations, stated plainl
 
 - **There is no live deployment.** The system was containerised and run on AWS during the
   2024 project; that instance is gone and nothing here is currently hosted. Treat the AWS
-  work as a past exercise, not a running service.
-- **The Dockerfile and deployment artefacts are not in this repository.** The `Dockerfile`,
-  TLS key and image tarball were gitignored, so the container is not reproducible from this
-  repo alone. Re-adding a clean, committed Dockerfile is the next planned change.
+  work as a past exercise, not a running service. The compose stack is the supported way to
+  run it today.
+- **The 2024 deployment artefacts are not recoverable.** The original `Dockerfile`, TLS key
+  and image tarball were gitignored and are lost. The Dockerfiles in this repository were
+  written in 2026 and are the ones the demo builds — they are not the images that ran on
+  AWS, and they terminate TLS nowhere.
 - **Scans are discarded if the product does not exist yet.** The processing loop marks a
   scan as processed whether or not a matching item is in the catalogue, so codes scanned
   before the product is added are consumed and lost. Add products on the update-stock page

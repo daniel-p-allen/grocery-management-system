@@ -36,9 +36,13 @@ if git ls-files --error-unmatch .cache_ggshield >/dev/null 2>&1; then
     status=1
 fi
 
-# A MongoDB URI is only allowed in this repository with a placeholder password.
-# Placeholders start with < (as in <password>) or $ (as in ${MONGO_PW}); a
-# password beginning with anything else is a real one.
+# A MongoDB URI is only a secret if it carries credentials, which means it has a
+# user:password@ before the host. A URI like mongodb://mongo:27017/grocerydb has
+# none — that colon is a port — so the local and compose connection strings are
+# not flagged.
+#
+# Where credentials are present, the password must be a placeholder. Placeholders
+# start with < (as in <password>) or $ (as in ${MONGO_PW}); anything else is real.
 #
 # -I skips binary files, so the architecture diagram and the PDFs are not
 # scanned byte-by-byte and cannot produce a false failure. This script contains
@@ -47,8 +51,8 @@ echo "Checking for live MongoDB connection strings..."
 uris=$(git ls-files -z \
     | grep -zZv -e '^scripts/check-secrets.sh$' \
     | xargs -0 grep -IhoE 'mongodb(\+srv)?://[^[:space:]"'"'"']+' 2>/dev/null \
-    | grep -vE 'mongodb(\+srv)?://[^:/]*:?[<$]' \
-    | grep -vE 'mongodb(\+srv)?://(localhost|127\.0\.0\.1)' \
+    | grep -E '://[^/@[:space:]]*:[^/@[:space:]]*@' \
+    | grep -vE '://[^/@[:space:]]*:[<$]' \
     | sort -u)
 
 if [ -n "$uris" ]; then
