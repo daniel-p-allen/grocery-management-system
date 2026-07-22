@@ -56,10 +56,16 @@ Both services read a `.env` file from their own directory. Create
 ```
 MONGO_URL=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/grocerydb?retryWrites=true&w=majority
 CUSTOMER_NUMBER=<the number used to unlock the UI>
+PROCESS_INTERVAL_MS=60000
 ```
 
-`CUSTOMER_NUMBER` is only needed by the frontend. `.env` files are gitignored and must
-never be committed.
+`CUSTOMER_NUMBER` and `PROCESS_INTERVAL_MS` are only needed by the frontend. `.env` files
+are gitignored and must never be committed.
+
+`PROCESS_INTERVAL_MS` sets how often new scans are turned into stock movements, and
+defaults to one minute. That is a sensible pace for a pantry but a tedious one for a
+demonstration, so lower it — `PROCESS_INTERVAL_MS=3000` makes the effect of a scan visible
+almost immediately.
 
 ### 2. Install and start the frontend
 
@@ -142,6 +148,10 @@ This is a **working prototype, not a product.** Known limitations, stated plainl
 - **The Dockerfile and deployment artefacts are not in this repository.** The `Dockerfile`,
   TLS key and image tarball were gitignored, so the container is not reproducible from this
   repo alone. Re-adding a clean, committed Dockerfile is the next planned change.
+- **Scans are discarded if the product does not exist yet.** The processing loop marks a
+  scan as processed whether or not a matching item is in the catalogue, so codes scanned
+  before the product is added are consumed and lost. Add products on the update-stock page
+  first, then scan.
 - **The serial port path is hardcoded** to `/dev/cu.usbmodem146201` in `bashservice.sh`.
   It must be edited to match your machine.
 - **`dbservice.js` is run manually** and prompts before clearing `data.json`; it is not a

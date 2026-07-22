@@ -8,6 +8,10 @@ const port = 4000;  // Using port 4000 as chosen
 const mongoUrl = process.env.MONGO_URL;  // MongoDB connection string from .env
 const validCustomerNumber = process.env.CUSTOMER_NUMBER;
 
+// How often new scans are turned into stock movements. A minute is a sensible pace for a
+// pantry, but it makes the system tedious to demonstrate or test, so it is configurable.
+const processIntervalMs = Number(process.env.PROCESS_INTERVAL_MS) || 60000;
+
 // Fail early with a readable message rather than a driver stack trace, which is what
 // a first-time clone hits when there is no .env file yet
 if (!mongoUrl) {
@@ -38,7 +42,8 @@ MongoClient.connect(mongoUrl, { useUnifiedTopology: true })
         console.log('Connected to MongoDB');
 
         // Start the periodic processing of grocery items
-        setInterval(processNewGroceryItems, 60000); // Runs every 60 seconds
+        console.log(`Processing new scans every ${processIntervalMs / 1000}s`);
+        setInterval(processNewGroceryItems, processIntervalMs);
     })
     .catch(error => console.error(error));
 
