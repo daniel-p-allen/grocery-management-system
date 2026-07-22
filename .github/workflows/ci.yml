@@ -1,0 +1,72 @@
+name: checks
+
+# The system is not run end-to-end here. Doing that would need a MongoDB Atlas
+# cluster and an Arduino on a serial port, and a job that depends on either is
+# flaky enough to tell you less than no job at all. What runs below is
+# deterministic: it either passes or something is genuinely wrong.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: No credentials in the repository
+        run: ./scripts/check-secrets.sh
+
+      - name: Services install cleanly
+        run: |
+          cd src/groceryfrontend && npm ci
+          cd ../newserver && npm ci
+
+      - name: JavaScript parses
+        run: |
+          for f in src/groceryfrontend/frontserver.js \
+                   src/newserver/dbservice.js \
+                   src/newserver/simulator.js; do
+            node --check "$f" && echo "  ok  $f"
+          done
+
+      - name: Shell script parses
+        run: bash -n src/newserver/bashservice.sh
+
+      - name: Sample scan data is valid JSON and has the expected shape
+        run: |
+          node -e '
+            const data = require("./src/newserver/data.json");
+            if (!Array.isArray(data) || data.length === 0) {
+              throw new Error("data.json must be a non-empty array");
+            }
+            data.forEach((entry, i) => {
+              for (const field of ["input", "timestamp"]) {
+                if (!(field in entry)) throw new Error(`entry ${i} is missing ${field}`);
+              }
+              if (!/^\d{3}$/.test(entry.input)) {
+                throw new Error(`entry ${i}: input "${entry.input}" is not a 3-digit code`);
+              }
+              if (Number.isNaN(Date.parse(entry.timestamp))) {
+                throw new Error(`entry ${i}: timestamp "${entry.timestamp}" is not a date`);
+              }
+            });
+            console.log(`${data.length} sample scans, all fields present`);
+          '
+
+      - name: Services refuse to start without configuration
+        run: |
+          cd src/newserver
+          if node dbservice.js; then
+            echo "dbservice.js should have exited non-zero with no MONGO_URL"
+            exit 1
+          fi
+          echo "  ok  dbservice.js fails closed"

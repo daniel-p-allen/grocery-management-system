@@ -1,13 +1,18 @@
 {
-  "name": "groceryfrontend",
+  "name": "grocery-frontend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Express web app for the Grocery Management System: serves the stock UI and periodically turns new scans into stock levels and order suggestions.",
+  "main": "frontserver.js",
   "scripts": {
-  "start": "node frontserver.js"
-},
-  "author": "",
-  "license": "ISC",
+    "start": "node frontserver.js"
+  },
+  "keywords": [
+    "express",
+    "mongodb",
+    "iot"
+  ],
+  "author": "Daniel Allen",
+  "license": "MIT",
   "dependencies": {
     "dotenv": "^16.4.5",
     "express": "^4.21.0",

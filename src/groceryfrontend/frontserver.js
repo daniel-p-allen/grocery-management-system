@@ -6,7 +6,17 @@ const { MongoClient } = require('mongodb');
 const app = express();
 const port = 4000;  // Using port 4000 as chosen
 const mongoUrl = process.env.MONGO_URL;  // MongoDB connection string from .env
-const validCustomerNumber = process.env.CUSTOMER_NUMBER; 
+const validCustomerNumber = process.env.CUSTOMER_NUMBER;
+
+// Fail early with a readable message rather than a driver stack trace, which is what
+// a first-time clone hits when there is no .env file yet
+if (!mongoUrl) {
+    console.error('MONGO_URL is not set. Create a .env file in this directory containing:');
+    console.error('  MONGO_URL=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/grocerydb');
+    console.error('  CUSTOMER_NUMBER=<number used to unlock the UI>');
+    console.error('See the README for details.');
+    process.exit(1);
+}
 
 let db;
 let settingsCollection;

@@ -1,18 +1,22 @@
 {
-  "name": "newserver",
+  "name": "grocery-edge-services",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Edge capture and database services for the Grocery Management System: reads product codes from the Arduino over serial and persists them to MongoDB.",
+  "main": "dbservice.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node dbservice.js",
+    "simulate": "node simulator.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "iot",
+    "arduino",
+    "mongodb",
+    "serial"
+  ],
+  "author": "Daniel Allen",
+  "license": "MIT",
   "dependencies": {
     "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "mongodb": "^6.8.0",
-    "serialport": "^12.0.0"
+    "mongodb": "^6.8.0"
   }
 }

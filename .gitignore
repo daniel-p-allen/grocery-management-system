@@ -25,3 +25,6 @@ src/newserver/.env
 .env
 # macOS
 .DS_Store
+
+# GitGuardian scanner cache
+.cache_ggshield

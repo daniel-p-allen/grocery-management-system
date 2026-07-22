@@ -5,9 +5,16 @@ const fs = require('fs');
 const { MongoClient } = require('mongodb');
 const readline = require('readline');
 
-// Check if MongoDB URL is loaded correctly
+// Check if MongoDB URL is loaded correctly. The URL itself is never logged, because it
+// contains the database password.
 const mongoUrl = process.env.MONGO_URL;
-console.log("MongoDB URL:", mongoUrl);
+
+if (!mongoUrl) {
+    console.error('MONGO_URL is not set. Create a .env file in this directory containing:');
+    console.error('  MONGO_URL=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/grocerydb');
+    console.error('See the README for details.');
+    process.exit(1);
+}
 
 // MongoDB client initialization
 let client;

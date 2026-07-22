@@ -11,6 +11,13 @@ const rl = readline.createInterface({
 function saveNumberToFile(number, timeAdjustment) {
     const filePath = './data.json';
 
+    // Create the file if it isn't there yet, so the simulator behaves the same as
+    // bashservice.sh does when it starts against a clean checkout
+    if (!fs.existsSync(filePath)) {
+        console.log(`\n${filePath} not found. Creating it with an empty array.`);
+        fs.writeFileSync(filePath, '[]');
+    }
+
     // Create the current date and apply the time adjustment (into the past)
     let currentDate = new Date();
     currentDate.setDate(currentDate.getDate() - timeAdjustment);  // Subtract the days for adjustment
