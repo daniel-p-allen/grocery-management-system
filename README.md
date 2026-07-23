@@ -169,13 +169,52 @@ grocery-management-system/
 │   └── groceryfrontend/        # Express app and UI
 ├── scripts/
 │   └── check-secrets.sh        # Refuses to ship committed credentials
-├── tests/                      # Recorded UI test results (not an automated suite)
+├── tests/                      # Automated black-box test suite, plus the 2024 UI results
 ├── docker-compose.yml          # Self-contained demo: database, seed, UI
-├── Makefile                    # demo, seed, start, simulate, check
+├── Makefile                    # demo, seed, start, simulate, test, check
 ├── System Architecture Document.pdf
 ├── grocery.drawio.png          # Architecture diagram
 └── LICENSE.txt                 # MIT
 ```
+
+## Tests
+
+```bash
+make test       # 56 automated tests, no setup required
+```
+
+No Docker, no Colima, no Atlas account, no `.env`. The tests supply their own MongoDB.
+
+These are **black-box** tests. They do not import the application — they start it, as a
+real process, exactly the way `npm start` does, and then drive it from the outside: over
+HTTP for the web app, over stdin for the command-line tools. What they assert on is what
+actually reached the database or the disk.
+
+That was a deliberate choice. Testing the internals would have meant adding exports and
+splitting files apart to create seams for the tests to reach through — reshaping the
+application to suit its tests. Driving it from outside means **nothing under `src/` had to
+change**, and what gets covered is the real system: the real Express routes, the real Mongo
+driver, the real queries.
+
+Several tests exist because a specific defect was found and fixed here. A fix without a
+test is a fix that comes back:
+
+| Test | The defect it holds shut |
+|---|---|
+| seeding twice does not reset stock that has moved | Seeding used `$set`, resetting every product to its starting quantity on the second run — a full pantry and an empty shopping list |
+| the password is not leaked when the connection string is rejected | The connection string, which carries the database password, was once printed on startup |
+| a missing `data.json` is created rather than hung on | The simulator hung on a clean checkout, so the first thing a new user tried appeared to freeze |
+| no database URL is refused with an explanation, not a stack trace | Services crashed with a driver stack trace instead of saying what was missing |
+| stock stops at zero rather than going negative | Negative stock reads as a shortfall forever |
+| a scan for an unknown product is marked processed instead of retried forever | Otherwise the record is retried on every tick for the life of the process |
+| stock levels are stored as numbers, not the strings a form posts | `"5"` stored as a string breaks the `$expr` comparison behind the shopping list, quietly |
+
+**The suite is verified rather than assumed.** Each of those defects was reintroduced, one
+at a time, in a scratch copy of the repository, and the matching test was confirmed to
+fail. A suite that has only ever passed proves nothing.
+
+[`tests/README.md`](tests/README.md) covers how to run them, how they work, and how to add
+one.
 
 ## Repository checks
 
@@ -199,7 +238,8 @@ The checks are verified against planted fake credentials rather than assumed to 
 
 The same script runs in CI on every push and pull request, alongside checks that both
 services install cleanly, all JavaScript and shell parses, the sample scan data has the
-expected shape, and the services fail closed when no configuration is present.
+expected shape, and the services fail closed when no configuration is present. The test
+suite runs there too, in a job of its own.
 
 ## Status
 
@@ -222,8 +262,8 @@ This is a **working prototype, not a product.** Known limitations, stated plainl
 - **`dbservice.js` is run manually** and prompts before clearing `data.json`; it is not a
   scheduled service.
 - **Authentication is a single shared customer number**, not real user accounts.
-- **`tests/` contains recorded UI test results, not an automated test suite.** There is no
-  `npm test`.
+- **The Arduino serial capture is not covered by the tests.** `bashservice.sh` and the
+  sketch need the hardware on a port; everything downstream of them is tested.
 
 ## Development notes
 

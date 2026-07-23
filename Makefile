@@ -10,8 +10,9 @@
 
 FRONTEND := src/groceryfrontend
 EDGE     := src/newserver
+TESTS    := tests
 
-.PHONY: demo demo-down install start simulate seed check clean
+.PHONY: demo demo-down install start simulate seed check test clean
 
 # The whole system, self-contained: local database, seeded pantry, UI on port 4000.
 # Needs Docker only. No Atlas account, no Arduino, no configuration.
@@ -43,5 +44,14 @@ seed:
 check:
 	@./scripts/check-secrets.sh
 
+# Automated tests. They start the real services as real processes and drive them
+# from the outside, so nothing under src/ had to be reshaped to make it testable.
+# The database is supplied by the tests themselves — no Docker, no Atlas account.
+#
+# Kept separate from `check`: that one needs nothing installed and runs in a
+# second, which is what makes it usable as a habit before every push.
+test: install
+	cd $(TESTS) && npm install --no-audit --no-fund && npm test
+
 clean:
-	rm -rf $(FRONTEND)/node_modules $(EDGE)/node_modules
+	rm -rf $(FRONTEND)/node_modules $(EDGE)/node_modules $(TESTS)/node_modules

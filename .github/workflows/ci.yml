@@ -1,9 +1,14 @@
 name: checks
 
-# The system is not run end-to-end here. Doing that would need a MongoDB Atlas
-# cluster and an Arduino on a serial port, and a job that depends on either is
-# flaky enough to tell you less than no job at all. What runs below is
-# deterministic: it either passes or something is genuinely wrong.
+# Two jobs, deliberately kept apart.
+#
+# `checks` is static: no database, no services started, nothing to install beyond
+# the packages. It either passes or something is genuinely wrong.
+#
+# `tests` runs the black-box suite, which starts the real services and drives them
+# from the outside against a throwaway MongoDB the tests supply themselves. Still no
+# Atlas cluster and no Arduino — the Arduino serial capture is the one part of the
+# system that cannot be tested without the hardware attached.
 
 on:
   push:
@@ -70,3 +75,25 @@ jobs:
             exit 1
           fi
           echo "  ok  dbservice.js fails closed"
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # mongodb-memory-server downloads a mongod binary on first use. Caching it
+      # keeps the run fast and means a slow or unavailable download upstream cannot
+      # turn into a red badge on a green codebase.
+      - name: Cache the MongoDB binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongodb-binaries-${{ runner.os }}-7.0
+
+      - name: Run the test suite
+        run: make test
