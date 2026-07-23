@@ -48,6 +48,44 @@ desired level and fell as the seeded scans were processed.
 
 The system is four processes connected by a serial port, a JSON file, and a database:
 
+```
+   at the edge, tethered to the scanner          │        anywhere
+                                                 │
+ 4x4 keypad ──► Arduino ──► USB serial           │
+                               │                 │
+                               ▼                 │
+                       bashservice.sh            │
+                    (listens, appends)           │
+                               │                 │
+                               ▼                 │
+                          data.json ─────────────┼──► dbservice.js
+                               ▲                 │          │
+                               │                 │          ▼
+                        simulator.js             │   ┌──────────────┐
+                   (stands in for the            │   │ groceryitems │  raw scans
+                    hardware — no                │   └──────┬───────┘
+                    Arduino needed)              │          │
+                                                 │          │ frontserver.js,
+                                                 │          │ every 60s
+                                                 │          ▼
+                                                 │   ┌──────────────┐
+                                                 │   │    items     │  stock levels
+                                                 │   └──────┬───────┘
+                                                 │          │
+                                                 │          ▼
+                                                 │      UI on :4000
+                                                 │   shopping list, ordering
+```
+
+A scan is consumed exactly once: `frontserver.js` marks each record `processed` as it
+turns it into a stock movement, whether or not a matching product exists. Without that,
+an unmatched scan would be retried on every tick for the life of the process.
+
+The component diagram drawn during the original build is
+[`grocery.drawio.png`](grocery.drawio.png), and the full design record — requirements,
+decisions and the hardware specification — is in
+[`System Architecture Document.pdf`](System%20Architecture%20Document.pdf).
+
 | Stage | Component | What it does |
 |---|---|---|
 | 1. Enter | `src/arduinoGROCERYPROJ/arduinoGROCERYPROJ.ino` | Reads a 3-digit product code from the keypad, sends it over USB serial on `#`. |
